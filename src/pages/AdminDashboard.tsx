@@ -211,20 +211,23 @@ const AdminDashboard = () => {
             </div>
             
             <div className="px-4 pb-3">
-              <TabsList className="grid grid-cols-4 w-full">
-                <TabsTrigger value="overview" onClick={() => setActiveTab("overview")}>
-                  <BarChart className="h-4 w-4" />
-                </TabsTrigger>
-                <TabsTrigger value="elections" onClick={() => setActiveTab("elections")}>
-                  <Calendar className="h-4 w-4" />
-                </TabsTrigger>
-                <TabsTrigger value="voters" onClick={() => setActiveTab("voters")}>
-                  <Users className="h-4 w-4" />
-                </TabsTrigger>
-                <TabsTrigger value="security" onClick={() => setActiveTab("security")}>
-                  <Shield className="h-4 w-4" />
-                </TabsTrigger>
-              </TabsList>
+              {/* Fixed: Wrapped TabsList in Tabs component */}
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="grid grid-cols-4 w-full">
+                  <TabsTrigger value="overview" onClick={() => setActiveTab("overview")}>
+                    <BarChart className="h-4 w-4" />
+                  </TabsTrigger>
+                  <TabsTrigger value="elections" onClick={() => setActiveTab("elections")}>
+                    <Calendar className="h-4 w-4" />
+                  </TabsTrigger>
+                  <TabsTrigger value="voters" onClick={() => setActiveTab("voters")}>
+                    <Users className="h-4 w-4" />
+                  </TabsTrigger>
+                  <TabsTrigger value="security" onClick={() => setActiveTab("security")}>
+                    <Shield className="h-4 w-4" />
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
           </header>
 
