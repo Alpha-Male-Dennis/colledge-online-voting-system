@@ -13,6 +13,11 @@ import ElectionResults from "./pages/ElectionResults";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
+// Admin routes
+import AdminElectionEdit from "./pages/admin/AdminElectionEdit";
+import AdminElectionNew from "./pages/admin/AdminElectionNew";
+import AdminElectionResults from "./pages/admin/AdminElectionResults";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -28,7 +33,13 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/elections/:id" element={<ElectionVote />} />
           <Route path="/elections/:id/results" element={<ElectionResults />} />
+          
+          {/* Admin routes */}
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/elections/new" element={<AdminElectionNew />} />
+          <Route path="/admin/elections/:id/edit" element={<AdminElectionEdit />} />
+          <Route path="/admin/elections/:id/results" element={<AdminElectionResults />} />
+          
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
