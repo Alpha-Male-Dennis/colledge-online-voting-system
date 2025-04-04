@@ -14,6 +14,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -22,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import AddVoterForm from "./AddVoterForm";
 
 // Mock voter data
 const mockVoters = [
@@ -38,6 +45,7 @@ const mockVoters = [
 const VotersSection = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [voters, setVoters] = useState(mockVoters);
+  const [isAddVoterOpen, setIsAddVoterOpen] = useState(false);
   const { toast } = useToast();
 
   const filteredVoters = voters.filter(voter => 
@@ -63,10 +71,32 @@ const VotersSection = () => {
   };
 
   const handleAddVoter = () => {
-    // This would open a modal form to add a new voter
+    setIsAddVoterOpen(true);
+  };
+
+  const handleSubmitVoter = (formData: any) => {
+    // Generate a unique ID
+    const newId = (Math.max(...voters.map(voter => parseInt(voter.id))) + 1).toString();
+    
+    // Create new voter with form data
+    const newVoter = {
+      id: newId,
+      name: formData.name,
+      email: formData.email,
+      status: formData.status,
+      lastLogin: formData.status === "active" ? new Date().toISOString().split('T')[0] : null
+    };
+    
+    // Add to voters list
+    setVoters([...voters, newVoter]);
+    
+    // Close dialog
+    setIsAddVoterOpen(false);
+    
+    // Show success toast
     toast({
-      title: "Add Voter",
-      description: "The form to add a new voter would appear here.",
+      title: "Voter Added",
+      description: `${formData.name} has been added to the system.`,
     });
   };
 
@@ -229,6 +259,19 @@ const VotersSection = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Add Voter Dialog */}
+      <Dialog open={isAddVoterOpen} onOpenChange={setIsAddVoterOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add New Voter</DialogTitle>
+          </DialogHeader>
+          <AddVoterForm 
+            onSubmit={handleSubmitVoter}
+            onCancel={() => setIsAddVoterOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
