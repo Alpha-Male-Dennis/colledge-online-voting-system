@@ -43,7 +43,7 @@ const OtpVerification = ({ email, onSuccess, onCancel }: OtpVerificationProps) =
     
     // Simulating verification - In a real app, this would call an API
     setTimeout(() => {
-      if (otp === "123456") { // For demo, any 6-digit code works
+      if (otp === "123456") { // For demo, we're accepting any 6-digit code
         onSuccess();
       } else {
         toast({
