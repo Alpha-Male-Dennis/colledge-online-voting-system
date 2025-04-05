@@ -1,4 +1,3 @@
-
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PostgrestError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,10 +23,8 @@ export function useSupabaseInsert(
 
   return useMutation({
     mutationFn: async (data: any) => {
-      const { data: result, error } = await supabase
-        .from(table)
-        .insert(data)
-        .select();
+      const query = supabase.from(table).insert(data).select();
+      const { data: result, error } = await query;
       
       if (error) throw error;
       return result;
@@ -75,11 +72,8 @@ export function useSupabaseUpdate(
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
-      const { data: result, error } = await supabase
-        .from(table)
-        .update(data)
-        .eq('id', id)
-        .select();
+      const query = supabase.from(table).update(data).eq('id', id).select();
+      const { data: result, error } = await query;
       
       if (error) throw error;
       return result;
@@ -127,10 +121,8 @@ export function useSupabaseDelete(
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { data, error } = await supabase
-        .from(table)
-        .delete()
-        .eq('id', id);
+      const query = supabase.from(table).delete().eq('id', id);
+      const { data, error } = await query;
       
       if (error) throw error;
       return data;

@@ -31,11 +31,8 @@ export function useSupabaseQuery<T = any>(
   return useQuery<T, PostgrestError>({
     queryKey: key,
     queryFn: async () => {
-      // Start with a properly typed query builder
-      const baseQuery = supabase.from(table);
-      
-      // Build the query step by step
-      let query = baseQuery.select(select);
+      // Build the query step by step, with explicit typing to avoid deep recursion
+      let query = supabase.from(table).select(select);
       
       // Apply equality filters
       for (const filter of eq) {
@@ -55,10 +52,16 @@ export function useSupabaseQuery<T = any>(
         query = query.range(range.from, range.to);
       }
       
+      let response;
+      
       // Execute query with proper handling for single vs multiple results
-      const { data, error } = single 
-        ? await query.single() 
-        : await query;
+      if (single) {
+        response = await query.single();
+      } else {
+        response = await query;
+      }
+      
+      const { data, error } = response;
       
       if (error) {
         throw error;
