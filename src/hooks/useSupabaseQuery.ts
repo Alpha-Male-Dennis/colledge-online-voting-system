@@ -31,27 +31,25 @@ export function useSupabaseQuery<T = any>(
   return useQuery<T, PostgrestError>({
     queryKey: key,
     queryFn: async () => {
-      // Use the type-safe approach to get a query builder
-      // This avoids using 'as' casting which can lead to deep type issues
-      const query = supabase
-        .from(table)
-        .select(select);
+      // Create a properly typed query using explicit type parameters
+      const baseQuery = supabase.from(table);
+      let query = baseQuery.select(select);
 
       // Apply equality filters
       eq.forEach(({ column, value }) => {
         if (value !== undefined && value !== null) {
-          query.eq(column, value);
+          query = query.eq(column, value);
         }
       });
 
       // Apply ordering
       if (order) {
-        query.order(order.column, { ascending: order.ascending ?? false });
+        query = query.order(order.column, { ascending: order.ascending ?? false });
       }
 
       // Apply range
       if (range) {
-        query.range(range.from, range.to);
+        query = query.range(range.from, range.to);
       }
 
       // Execute query

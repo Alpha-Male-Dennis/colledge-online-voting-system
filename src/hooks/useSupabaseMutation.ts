@@ -1,4 +1,3 @@
-
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PostgrestError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -33,14 +32,12 @@ export function useSupabaseInsert(
       return result;
     },
     onSuccess: (data) => {
-      // Invalidate relevant queries
       if (config.invalidateQueries) {
         config.invalidateQueries.forEach(query => {
           queryClient.invalidateQueries({ queryKey: query });
         });
       }
 
-      // Show success toast if configured
       if (config.toastSuccess) {
         toast({
           title: config.toastSuccess.title,
@@ -48,13 +45,11 @@ export function useSupabaseInsert(
         });
       }
 
-      // Call custom onSuccess handler if provided
       if (config.onSuccess) {
         config.onSuccess(data);
       }
     },
     onError: (error: PostgrestError) => {
-      // Show error toast if configured
       if (config.toastError) {
         toast({
           title: config.toastError.title,
@@ -63,7 +58,6 @@ export function useSupabaseInsert(
         });
       }
 
-      // Call custom onError handler if provided
       if (config.onError) {
         config.onError(error);
       }
