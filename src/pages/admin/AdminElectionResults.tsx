@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -17,18 +16,19 @@ import {
   CartesianGrid, 
   Tooltip, 
   Legend, 
-  ResponsiveContainer 
+  ResponsiveContainer,
+  LineChart,
+  Line
 } from "recharts";
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-// Mock election results data - in a real app would come from an API call
 const mockElectionResults = {
   id: "1",
   title: "Student Council President Election",
-  status: "active", // active, completed, or upcoming
+  status: "active",
   startDate: "2025-04-01T09:00:00",
   endDate: "2025-04-10T18:00:00",
   totalEligibleVoters: 2845,
@@ -107,7 +107,6 @@ const mockElectionResults = {
   ]
 };
 
-// For the pie chart
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d'];
 
 const AdminElectionResults = () => {
@@ -119,10 +118,8 @@ const AdminElectionResults = () => {
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    // In a real app, this would be an API call using the id from params
     console.log(`Loading election results for ID: ${id}`);
     
-    // Simulate API delay
     const timeout = setTimeout(() => {
       setElectionData(mockElectionResults);
       setLoading(false);
@@ -256,8 +253,9 @@ const AdminElectionResults = () => {
           
           <TabsContent value="overview">
             <Card className="mb-6">
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle>Vote Activity Over Time</CardTitle>
+                <BarChart className="h-4 w-4 text-blue-500" />
               </CardHeader>
               <CardContent>
                 <div className="h-[300px]">
@@ -270,10 +268,17 @@ const AdminElectionResults = () => {
                         },
                         label: "Votes Cast",
                       },
+                      trend: {
+                        theme: {
+                          light: "#10b981",
+                          dark: "#34d399",
+                        },
+                        label: "Trend",
+                      }
                     }}
                   >
                     <ResponsiveContainer width="100%" height="100%">
-                      <RechartsBarChart
+                      <LineChart
                         data={electionData.votesOverTime}
                         margin={{
                           top: 20,
@@ -288,16 +293,24 @@ const AdminElectionResults = () => {
                           angle={-45} 
                           textAnchor="end"
                           height={60}
+                          tick={{ fontSize: 12 }}
+                          stroke="#9ca3af"
                         />
-                        <YAxis />
+                        <YAxis 
+                          tick={{ fontSize: 12 }}
+                          stroke="#9ca3af"
+                          width={40}
+                        />
                         <Tooltip content={<ChartTooltipContent labelKey="time" />} />
-                        <Bar 
+                        <Legend wrapperStyle={{ paddingTop: 20 }} />
+                        <Line 
+                          type="monotone" 
                           dataKey="votes" 
-                          fill="var(--color-votes)" 
-                          name="Votes"
-                          radius={[4, 4, 0, 0]}
+                          stroke="var(--color-votes)" 
+                          activeDot={{ r: 8 }}
+                          strokeWidth={2}
                         />
-                      </RechartsBarChart>
+                      </LineChart>
                     </ResponsiveContainer>
                   </ChartContainer>
                 </div>

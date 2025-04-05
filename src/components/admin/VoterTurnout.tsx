@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 import { TrendingUp } from "lucide-react";
 
@@ -53,9 +53,10 @@ const VoterTurnout = ({ data }: VoterTurnoutProps) => {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart 
                 data={chartData} 
-                margin={{ top: 5, right: 5, left: 5, bottom: 25 }}
-                barCategoryGap={8}
+                margin={{ top: 5, right: 10, left: 10, bottom: 25 }}
+                barCategoryGap={12}
               >
+                <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                 <XAxis 
                   dataKey="name" 
                   tickLine={false}
