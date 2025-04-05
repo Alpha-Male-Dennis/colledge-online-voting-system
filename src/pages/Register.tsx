@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import OtpVerification from "@/components/OtpVerification";
 
 const Register = () => {
@@ -21,6 +22,7 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const { signUp } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -53,19 +55,28 @@ const Register = () => {
     setIsLoading(true);
     
     try {
-      // Here would be actual registration logic
-      // For demo purposes:
-      setTimeout(() => {
-        // Send verification email with OTP
+      // Include user metadata for the profile
+      const metadata = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        student_id: formData.studentId
+      };
+      
+      const { error } = await signUp(formData.email, formData.password, metadata);
+      
+      if (error) {
+        console.error("Registration error:", error);
+      } else {
+        // For email verification flow
         setShowOtp(true);
-        setIsLoading(false);
-      }, 1000);
-    } catch (error) {
+      }
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Registration failed",
+        description: error.message || "Registration failed",
         variant: "destructive"
       });
+    } finally {
       setIsLoading(false);
     }
   };

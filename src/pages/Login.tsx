@@ -1,10 +1,11 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import OtpVerification from "@/components/OtpVerification";
 
@@ -13,6 +14,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
+  const { signIn } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -21,28 +23,33 @@ const Login = () => {
     setIsLoading(true);
     
     try {
-      // Here would be actual authentication logic
-      // For demo purposes:
-      if (email && password) {
-        setTimeout(() => {
-          // Send OTP for 2FA
-          setShowOtp(true);
-          setIsLoading(false);
-        }, 1000);
-      } else {
+      const { error } = await signIn(email, password);
+      
+      if (error) {
+        console.error("Login error:", error);
         toast({
           title: "Error",
-          description: "Please fill all fields",
+          description: error.message || "Invalid credentials",
           variant: "destructive"
         });
-        setIsLoading(false);
+      } else {
+        // For 2FA flow (if implemented)
+        // setShowOtp(true);
+        
+        // For direct login
+        toast({
+          title: "Success",
+          description: "Login successful!"
+        });
+        navigate("/dashboard");
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Invalid credentials",
+        description: error.message || "An unexpected error occurred",
         variant: "destructive"
       });
+    } finally {
       setIsLoading(false);
     }
   };

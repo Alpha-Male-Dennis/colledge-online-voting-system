@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -29,29 +29,37 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import AddVoterForm from "./AddVoterForm";
-
-// Mock voter data
-const mockVoters = [
-  { id: "1001", name: "Alice Johnson", email: "alice@university.edu", status: "active", lastLogin: "2025-04-03" },
-  { id: "1002", name: "Bob Smith", email: "bob@university.edu", status: "active", lastLogin: "2025-04-02" },
-  { id: "1003", name: "Charlie Davis", email: "charlie@university.edu", status: "pending", lastLogin: null },
-  { id: "1004", name: "Diana Wilson", email: "diana@university.edu", status: "active", lastLogin: "2025-04-01" },
-  { id: "1005", name: "Edward Brown", email: "edward@university.edu", status: "suspended", lastLogin: "2025-03-25" },
-  { id: "1006", name: "Fiona Miller", email: "fiona@university.edu", status: "active", lastLogin: "2025-04-04" },
-  { id: "1007", name: "George Taylor", email: "george@university.edu", status: "active", lastLogin: "2025-04-03" },
-  { id: "1008", name: "Hannah Clark", email: "hannah@university.edu", status: "pending", lastLogin: null },
-];
+import { supabase } from "@/integrations/supabase/client";
+import { useSupabaseQuery } from "@/hooks/useSupabaseQuery";
+import { useSupabaseUpdate } from "@/hooks/useSupabaseMutation";
 
 const VotersSection = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [voters, setVoters] = useState(mockVoters);
   const [isAddVoterOpen, setIsAddVoterOpen] = useState(false);
   const { toast } = useToast();
 
+  // Fetch voters from Supabase
+  const { data: voters = [], refetch: refetchVoters } = useSupabaseQuery<any[]>(
+    ['voters'],
+    'profiles',
+    {
+      select: '*, auth_users:auth.users(email, last_sign_in_at)',
+      order: { column: 'created_at', ascending: false },
+    }
+  );
+
+  // Update voter status mutation
+  const updateVoterMutation = useSupabaseUpdate('profiles', {
+    toastSuccess: { title: 'Voter status updated successfully' },
+    toastError: { title: 'Failed to update voter status' },
+    invalidateQueries: [['voters']],
+  });
+
   const filteredVoters = voters.filter(voter => 
-    voter.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    voter.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    voter.id.includes(searchQuery)
+    (voter.first_name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) || 
+    (voter.last_name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) || 
+    (voter.auth_users?.email?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+    (voter.student_id || '').includes(searchQuery)
   );
 
   const handleImportData = () => {
@@ -74,53 +82,34 @@ const VotersSection = () => {
     setIsAddVoterOpen(true);
   };
 
-  const handleSubmitVoter = (formData: any) => {
-    // Generate a unique ID
-    const newId = (Math.max(...voters.map(voter => parseInt(voter.id))) + 1).toString();
-    
-    // Create new voter with form data
-    const newVoter = {
-      id: newId,
-      name: formData.name,
-      email: formData.email,
-      status: formData.status,
-      lastLogin: formData.status === "active" ? new Date().toISOString().split('T')[0] : null
-    };
-    
-    // Add to voters list
-    setVoters([...voters, newVoter]);
-    
-    // Close dialog
-    setIsAddVoterOpen(false);
-    
-    // Show success toast
-    toast({
-      title: "Voter Added",
-      description: `${formData.name} has been added to the system.`,
-    });
+  const handleSubmitVoter = async (formData: any) => {
+    try {
+      // In a real implementation, this would create a user account
+      // For this demo, we just show a success message
+      toast({
+        title: "Voter Invitation Sent",
+        description: `${formData.name} has been invited to the system.`,
+      });
+      
+      setIsAddVoterOpen(false);
+      refetchVoters();
+    } catch (error) {
+      console.error("Error adding voter:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add voter. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleApproveVoter = (id: string) => {
-    setVoters(prev => 
-      prev.map(voter => 
-        voter.id === id ? { ...voter, status: "active" } : voter
-      )
-    );
-    toast({
-      title: "Voter Approved",
-      description: `Voter ID ${id} has been approved.`,
-    });
-  };
-
-  const handleSuspendVoter = (id: string) => {
-    setVoters(prev => 
-      prev.map(voter => 
-        voter.id === id ? { ...voter, status: "suspended" } : voter
-      )
-    );
-    toast({
-      title: "Voter Suspended",
-      description: `Voter ID ${id} has been suspended.`,
+  const handleUpdateVoterStatus = (id: string, status: string) => {
+    updateVoterMutation.mutate({ 
+      id, 
+      data: { 
+        status,
+        // Update other fields as needed
+      } 
     });
   };
 
@@ -134,17 +123,17 @@ const VotersSection = () => {
     }).format(date);
   };
 
-  const renderStatusBadge = (status: string) => {
-    switch (status) {
-      case "active":
-        return <Badge className="bg-green-500">Active</Badge>;
-      case "pending":
-        return <Badge variant="outline" className="text-amber-500 border-amber-500">Pending</Badge>;
-      case "suspended":
-        return <Badge variant="destructive">Suspended</Badge>;
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
+  const renderStatusBadge = (voter: any) => {
+    // Determine status based on Supabase auth state and profile
+    if (!voter.auth_users) {
+      return <Badge variant="outline" className="text-amber-500 border-amber-500">Pending</Badge>;
     }
+    
+    if (voter.is_admin) {
+      return <Badge className="bg-blue-500">Admin</Badge>;
+    }
+    
+    return <Badge className="bg-green-500">Active</Badge>;
   };
 
   return (
@@ -186,9 +175,9 @@ const VotersSection = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>ID</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
+                    <TableHead>Student ID</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Last Login</TableHead>
                     <TableHead className="w-[80px]">Actions</TableHead>
@@ -198,11 +187,11 @@ const VotersSection = () => {
                   {filteredVoters.length > 0 ? (
                     filteredVoters.map((voter) => (
                       <TableRow key={voter.id}>
-                        <TableCell className="font-medium">{voter.id}</TableCell>
-                        <TableCell>{voter.name}</TableCell>
-                        <TableCell>{voter.email}</TableCell>
-                        <TableCell>{renderStatusBadge(voter.status)}</TableCell>
-                        <TableCell>{formatDate(voter.lastLogin)}</TableCell>
+                        <TableCell className="font-medium">{`${voter.first_name} ${voter.last_name}`}</TableCell>
+                        <TableCell>{voter.auth_users?.email || "Not registered"}</TableCell>
+                        <TableCell>{voter.student_id || "N/A"}</TableCell>
+                        <TableCell>{renderStatusBadge(voter)}</TableCell>
+                        <TableCell>{formatDate(voter.auth_users?.last_sign_in_at)}</TableCell>
                         <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -213,24 +202,22 @@ const VotersSection = () => {
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={() => toast({ title: "View Details", description: `View details for ${voter.name}` })}>
+                              <DropdownMenuItem onClick={() => toast({ title: "View Details", description: `View details for ${voter.first_name} ${voter.last_name}` })}>
                                 View details
                               </DropdownMenuItem>
-                              {voter.status === "pending" && (
-                                <DropdownMenuItem onClick={() => handleApproveVoter(voter.id)}>
-                                  Approve registration
+                              
+                              {!voter.is_admin && (
+                                <DropdownMenuItem onClick={() => updateVoterMutation.mutate({ id: voter.id, data: { is_admin: true } })}>
+                                  Make admin
                                 </DropdownMenuItem>
                               )}
-                              {voter.status === "active" && (
-                                <DropdownMenuItem onClick={() => handleSuspendVoter(voter.id)}>
-                                  Suspend account
+                              
+                              {voter.is_admin && (
+                                <DropdownMenuItem onClick={() => updateVoterMutation.mutate({ id: voter.id, data: { is_admin: false } })}>
+                                  Remove admin
                                 </DropdownMenuItem>
                               )}
-                              {voter.status === "suspended" && (
-                                <DropdownMenuItem onClick={() => handleApproveVoter(voter.id)}>
-                                  Reactivate account
-                                </DropdownMenuItem>
-                              )}
+                              
                               <DropdownMenuItem 
                                 className="text-red-600"
                                 onClick={() => toast({ 
