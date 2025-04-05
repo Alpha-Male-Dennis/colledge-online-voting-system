@@ -82,7 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (data) {
         setProfile(data);
-        setIsAdmin(!!data?.is_admin);
+        setIsAdmin(!!data.is_admin);
       }
     } catch (error) {
       console.error('Error in fetchProfile:', error);

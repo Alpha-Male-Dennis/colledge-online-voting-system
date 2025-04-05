@@ -5,6 +5,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Database } from '@/integrations/supabase/types';
 
+type TableNames = keyof Database['public']['Tables'];
+
 type MutationConfig = {
   onSuccess?: (data: any) => void;
   onError?: (error: PostgrestError) => void;
@@ -14,7 +16,7 @@ type MutationConfig = {
 };
 
 export function useSupabaseInsert(
-  table: keyof Database['public']['Tables'],
+  table: TableNames,
   config: MutationConfig = {}
 ) {
   const queryClient = useQueryClient();
@@ -70,7 +72,7 @@ export function useSupabaseInsert(
 }
 
 export function useSupabaseUpdate(
-  table: keyof Database['public']['Tables'],
+  table: TableNames,
   config: MutationConfig = {}
 ) {
   const queryClient = useQueryClient();
@@ -122,7 +124,7 @@ export function useSupabaseUpdate(
 }
 
 export function useSupabaseDelete(
-  table: keyof Database['public']['Tables'],
+  table: TableNames,
   config: MutationConfig = {}
 ) {
   const queryClient = useQueryClient();

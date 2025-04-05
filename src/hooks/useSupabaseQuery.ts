@@ -30,7 +30,10 @@ export function useSupabaseQuery<T = any>(
   return useQuery<T, PostgrestError>({
     queryKey: key,
     queryFn: async () => {
-      let query = supabase.from(table as string).select(select);
+      // Use proper typing for the table parameter
+      let query = supabase
+        .from(table)
+        .select(select);
 
       // Apply equality filters
       eq.forEach(({ column, value }) => {
