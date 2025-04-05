@@ -4,6 +4,7 @@ import { PostgrestError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 
+// Define TableNames type to avoid recursive type references
 type TableNames = keyof Database['public']['Tables'];
 
 export function useSupabaseQuery<T = any>(
@@ -30,26 +31,27 @@ export function useSupabaseQuery<T = any>(
   return useQuery<T, PostgrestError>({
     queryKey: key,
     queryFn: async () => {
-      // Use proper typing for the table parameter
-      let query = supabase
+      // Use the type-safe approach to get a query builder
+      // This avoids using 'as' casting which can lead to deep type issues
+      const query = supabase
         .from(table)
         .select(select);
 
       // Apply equality filters
       eq.forEach(({ column, value }) => {
         if (value !== undefined && value !== null) {
-          query = query.eq(column, value);
+          query.eq(column, value);
         }
       });
 
       // Apply ordering
       if (order) {
-        query = query.order(order.column, { ascending: order.ascending ?? false });
+        query.order(order.column, { ascending: order.ascending ?? false });
       }
 
       // Apply range
       if (range) {
-        query = query.range(range.from, range.to);
+        query.range(range.from, range.to);
       }
 
       // Execute query
