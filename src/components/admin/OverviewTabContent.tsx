@@ -1,4 +1,5 @@
 
+import { Activity } from "lucide-react";
 import DashboardStats from "./DashboardStats";
 import RecentActivity from "./RecentActivity";
 import VoterTurnout from "./VoterTurnout";
@@ -28,13 +29,19 @@ interface OverviewTabContentProps {
 const OverviewTabContent = ({ stats }: OverviewTabContentProps) => {
   return (
     <div className="space-y-6 animate-fade-in">
-      <h1 className="text-2xl font-bold">Dashboard Overview</h1>
+      <div className="flex items-center justify-between mb-2">
+        <h1 className="text-2xl font-bold">Dashboard Overview</h1>
+        <div className="flex items-center text-sm text-muted-foreground bg-muted/40 px-3 py-1 rounded-full">
+          <Activity className="h-4 w-4 mr-2 text-blue-500" />
+          <span>Vote Activity Overview</span>
+        </div>
+      </div>
       
       <DashboardStats stats={stats} />
       
       <div className="grid md:grid-cols-2 gap-6">
-        <RecentActivity activities={stats.recentActivity} />
         <VoterTurnout data={stats.popularElections} />
+        <RecentActivity activities={stats.recentActivity} />
       </div>
     </div>
   );
