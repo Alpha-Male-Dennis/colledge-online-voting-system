@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PostgrestError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { Database } from '@/integrations/supabase/types';
 
 type MutationConfig = {
   onSuccess?: (data: any) => void;
@@ -13,7 +14,7 @@ type MutationConfig = {
 };
 
 export function useSupabaseInsert(
-  table: string,
+  table: keyof Database['public']['Tables'],
   config: MutationConfig = {}
 ) {
   const queryClient = useQueryClient();
@@ -69,7 +70,7 @@ export function useSupabaseInsert(
 }
 
 export function useSupabaseUpdate(
-  table: string,
+  table: keyof Database['public']['Tables'],
   config: MutationConfig = {}
 ) {
   const queryClient = useQueryClient();
@@ -121,7 +122,7 @@ export function useSupabaseUpdate(
 }
 
 export function useSupabaseDelete(
-  table: string,
+  table: keyof Database['public']['Tables'],
   config: MutationConfig = {}
 ) {
   const queryClient = useQueryClient();

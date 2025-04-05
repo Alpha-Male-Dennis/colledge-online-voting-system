@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 export function useSupabaseQuery<T = any>(
   key: string[],
-  table: string,
+  table: keyof Database['public']['Tables'],
   options: {
     select?: string;
     eq?: { column: string; value: any }[];

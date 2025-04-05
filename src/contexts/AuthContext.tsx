@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { Database } from '@/integrations/supabase/types';
 
 interface AuthContextType {
   session: Session | null;
@@ -79,8 +80,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
-      setProfile(data);
-      setIsAdmin(!!data?.is_admin);
+      if (data) {
+        setProfile(data);
+        setIsAdmin(!!data?.is_admin);
+      }
     } catch (error) {
       console.error('Error in fetchProfile:', error);
     }
