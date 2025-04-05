@@ -2,10 +2,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { PostgrestError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { Database } from '@/integrations/supabase/types';
+
+type TableNames = keyof Database['public']['Tables'];
 
 export function useSupabaseQuery<T = any>(
   key: string[],
-  table: keyof Database['public']['Tables'],
+  table: TableNames,
   options: {
     select?: string;
     eq?: { column: string; value: any }[];
@@ -27,7 +30,7 @@ export function useSupabaseQuery<T = any>(
   return useQuery<T, PostgrestError>({
     queryKey: key,
     queryFn: async () => {
-      let query = supabase.from(table).select(select);
+      let query = supabase.from(table as string).select(select);
 
       // Apply equality filters
       eq.forEach(({ column, value }) => {
