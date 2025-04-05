@@ -1,3 +1,4 @@
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PostgrestError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,11 +24,12 @@ export function useSupabaseInsert(
 
   return useMutation({
     mutationFn: async (data: any) => {
-      const query = supabase.from(table).insert(data).select();
-      const { data: result, error } = await query;
+      // Type assertion to avoid deep recursion
+      const queryBuilder = supabase.from(table).insert(data);
+      const result = await queryBuilder.select();
       
-      if (error) throw error;
-      return result;
+      if (result.error) throw result.error;
+      return result.data;
     },
     onSuccess: (data) => {
       if (config.invalidateQueries) {
@@ -72,11 +74,12 @@ export function useSupabaseUpdate(
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
-      const query = supabase.from(table).update(data).eq('id', id).select();
-      const { data: result, error } = await query;
+      // Type assertion to avoid deep recursion
+      const queryBuilder = supabase.from(table).update(data).eq('id', id);
+      const result = await queryBuilder.select();
       
-      if (error) throw error;
-      return result;
+      if (result.error) throw result.error;
+      return result.data;
     },
     onSuccess: (data) => {
       if (config.invalidateQueries) {
@@ -121,11 +124,12 @@ export function useSupabaseDelete(
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const query = supabase.from(table).delete().eq('id', id);
-      const { data, error } = await query;
+      // Type assertion to avoid deep recursion
+      const queryBuilder = supabase.from(table).delete().eq('id', id);
+      const result = await queryBuilder;
       
-      if (error) throw error;
-      return data;
+      if (result.error) throw result.error;
+      return result.data;
     },
     onSuccess: (data) => {
       if (config.invalidateQueries) {

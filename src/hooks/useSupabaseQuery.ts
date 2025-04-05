@@ -1,6 +1,6 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { PostgrestError } from '@supabase/supabase-js';
+import { PostgrestError, PostgrestFilterBuilder, PostgrestSingleResponse } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 
@@ -31,43 +31,44 @@ export function useSupabaseQuery<T = any>(
   return useQuery<T, PostgrestError>({
     queryKey: key,
     queryFn: async () => {
-      // Build the query step by step, with explicit typing to avoid deep recursion
-      let query = supabase.from(table).select(select);
+      // Initial query setup
+      let queryBuilder = supabase.from(table).select(select);
       
-      // Apply equality filters
-      for (const filter of eq) {
+      // Apply filters
+      eq.forEach(filter => {
         const { column, value } = filter;
         if (value !== undefined && value !== null) {
-          query = query.eq(column, value);
+          // Type assertion to avoid deep recursion
+          queryBuilder = queryBuilder.eq(column, value) as any;
         }
-      }
+      });
       
       // Apply ordering
       if (order) {
-        query = query.order(order.column, { ascending: order.ascending ?? false });
+        queryBuilder = queryBuilder.order(order.column, { 
+          ascending: order.ascending ?? false 
+        }) as any;
       }
       
       // Apply range
       if (range) {
-        query = query.range(range.from, range.to);
+        queryBuilder = queryBuilder.range(range.from, range.to) as any;
       }
       
-      let response;
+      // Execute query
+      let response: PostgrestSingleResponse<T>;
       
-      // Execute query with proper handling for single vs multiple results
       if (single) {
-        response = await query.single();
+        response = await queryBuilder.single();
       } else {
-        response = await query;
+        response = await queryBuilder;
       }
       
-      const { data, error } = response;
-      
-      if (error) {
-        throw error;
+      if (response.error) {
+        throw response.error;
       }
       
-      return data as T;
+      return response.data as T;
     },
     enabled,
   });
