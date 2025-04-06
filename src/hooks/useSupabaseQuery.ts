@@ -38,20 +38,21 @@ export function useSupabaseQuery<T = any>(
       eq.forEach(filter => {
         const { column, value } = filter;
         if (value !== undefined && value !== null) {
-          queryBuilder = queryBuilder.eq(column, value);
+          // Use type assertion to break the recursive type checking
+          queryBuilder = (queryBuilder as any).eq(column, value);
         }
       });
       
       // Apply ordering
       if (order) {
-        queryBuilder = queryBuilder.order(order.column, { 
+        queryBuilder = (queryBuilder as any).order(order.column, { 
           ascending: order.ascending ?? false 
         });
       }
       
       // Apply range
       if (range) {
-        queryBuilder = queryBuilder.range(range.from, range.to);
+        queryBuilder = (queryBuilder as any).range(range.from, range.to);
       }
       
       // Execute query
