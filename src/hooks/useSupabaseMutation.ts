@@ -24,9 +24,8 @@ export function useSupabaseInsert(
 
   return useMutation({
     mutationFn: async (data: any) => {
-      // Type assertion to avoid deep recursion
-      const queryBuilder = supabase.from(table).insert(data);
-      const result = await queryBuilder.select();
+      const query = supabase.from(table).insert(data);
+      const result = await query.select();
       
       if (result.error) throw result.error;
       return result.data;
@@ -74,9 +73,8 @@ export function useSupabaseUpdate(
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
-      // Type assertion to avoid deep recursion
-      const queryBuilder = supabase.from(table).update(data).eq('id', id);
-      const result = await queryBuilder.select();
+      const query = supabase.from(table).update(data).eq('id', id);
+      const result = await query.select();
       
       if (result.error) throw result.error;
       return result.data;
@@ -124,9 +122,8 @@ export function useSupabaseDelete(
 
   return useMutation({
     mutationFn: async (id: string) => {
-      // Type assertion to avoid deep recursion
-      const queryBuilder = supabase.from(table).delete().eq('id', id);
-      const result = await queryBuilder;
+      const query = supabase.from(table).delete().eq('id', id);
+      const result = await query;
       
       if (result.error) throw result.error;
       return result.data;
