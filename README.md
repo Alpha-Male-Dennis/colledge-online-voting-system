@@ -1,18 +1,10 @@
-# Welcome to your Lovable project
+# Welcome to colledge-online-voting-system
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/46929bb8-503a-41ef-a47e-d8a79af6e45f
+Just a media frontend demo with some basic backend of a voting system
 
 ## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/46929bb8-503a-41ef-a47e-d8a79af6e45f) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
 
 **Use your preferred IDE**
 
@@ -60,13 +52,7 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/46929bb8-503a-41ef-a47e-d8a79af6e45f) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes it is!
+Yes, you can!
 
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
